@@ -20,6 +20,9 @@ class GameScene: SKScene {
         background.zPosition = -1
         // add this image to the current screen
         addChild(background)
+        // add a physics body to the whole scene (edgeLoopFromRect goes around the scene)
+        // the effect is the falling boxes in touchesBegan() will be stopped/contained at the screen bottom
+        physicsBody = SKPhysicsBody(edgeLoopFromRect: frame)
     }
 
     // this method is triggered when the user touches the screen.

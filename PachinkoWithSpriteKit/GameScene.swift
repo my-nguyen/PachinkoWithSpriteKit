@@ -23,6 +23,16 @@ class GameScene: SKScene {
         // add a physics body to the whole scene (edgeLoopFromRect goes around the scene)
         // the effect is the falling boxes in touchesBegan() will be stopped/contained at the screen bottom
         physicsBody = SKPhysicsBody(edgeLoopFromRect: frame)
+
+        /// create a stationary node at the center of the bottom edge which won't budge when collided
+        /// by red balls
+        let bouncer = SKSpriteNode(imageNamed: "bouncer")
+        // position is center horizontally on the bottom edge
+        bouncer.position = CGPoint(x: 512, y: 0)
+        bouncer.physicsBody = SKPhysicsBody(circleOfRadius: bouncer.size.width/2.0)
+        // set up so the bouncer object won't move when collided
+        bouncer.physicsBody!.dynamic = false
+        addChild(bouncer)
     }
 
     // this method is triggered when the user touches the screen.

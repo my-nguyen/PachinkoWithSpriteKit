@@ -23,7 +23,18 @@ class GameScene: SKScene {
         addChild(background)
     }
 
+    // this method is triggered when the user touches the screen.
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        if let touch = touches.first {
+            // fetch the location where the screen is touched
+            let location = touch.locationInNode(self)
+            // create a node filled with red color with size of 64 by 64
+            let box = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: 64, height: 64))
+            // set the box's position at where the touch occurred
+            box.position = location
+            // add the box to the scene
+            addChild(box)
+        }
     }
    
     override func update(currentTime: CFTimeInterval) {

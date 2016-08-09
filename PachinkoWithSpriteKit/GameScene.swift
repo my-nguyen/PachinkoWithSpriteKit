@@ -30,15 +30,16 @@ class GameScene: SKScene {
         if let touch = touches.first {
             // fetch the location where the screen is touched
             let location = touch.locationInNode(self)
-            // create a node filled with red color with size of 64 by 64
-            let box = SKSpriteNode(color: UIColor.redColor(), size: CGSize(width: 64, height: 64))
-            // add a physics body to the box, which is a rectangle of the same size as the box
-            // the effect is the box now appears to have physics so that it falls to the screen bottom
-            box.physicsBody = SKPhysicsBody(rectangleOfSize: CGSize(width: 64, height: 64))
-            // set the box's position at where the touch occurred
-            box.position = location
-            // add the box to the scene
-            addChild(box)
+            // create a Sprite node based on the image "ballRed.png"
+            let ball = SKSpriteNode(imageNamed: "ballRed")
+            // create a physics body with a circle shape
+            ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.size.width/2.0)
+            // set the ball bounciness
+            ball.physicsBody!.restitution = 0.4
+            // set the ball's position at where the touch occurred
+            ball.position = location
+            // add the ball to the scene
+            addChild(ball)
         }
     }
    

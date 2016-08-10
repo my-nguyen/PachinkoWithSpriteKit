@@ -10,6 +10,15 @@ import SpriteKit
 
 // class conforms to the SKPhysicsContactDelegate protocol
 class GameScene: SKScene, SKPhysicsContactDelegate {
+
+    var scoreLabel: SKLabelNode!
+    // score, with property observer
+    var score: Int = 0 {
+        didSet {
+            scoreLabel.text = "Score: \(score)"
+        }
+    }
+
     override func didMoveToView(view: SKView) {
         /// draw a dark blue background (replacing the default gray background) image in the center of the screen
         let background = SKSpriteNode(imageNamed: "background.jpg")
@@ -40,6 +49,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         makeBouncerAt(CGPoint(x: 512, y: 0))
         makeBouncerAt(CGPoint(x: 768, y: 0))
         makeBouncerAt(CGPoint(x: 1024, y: 0))
+
+        // use font Chalkduster
+        scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
+        scoreLabel.text = "Score: 0"
+        // align the label to the right
+        scoreLabel.horizontalAlignmentMode = .Right
+        // position the label on the top-right edge of the scene
+        scoreLabel.position = CGPoint(x: 980, y: 700)
+        addChild(scoreLabel)
     }
 
     // this method is triggered when the user touches the screen.
@@ -133,8 +151,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // remove ball when it collides with either the good or the bad slot
         if object.name == "good" {
             destroyBall(ball)
+            score += 1
         } else if object.name == "bad" {
             destroyBall(ball)
+            score -= 1
         }
         // ignore when 2 balls collide, so the 2 balls will remain intact
     }

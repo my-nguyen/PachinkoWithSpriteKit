@@ -109,8 +109,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
                     addChild(box)
                 } else {
-                    // otherwise, create a Sprite node based on the image "ballRed.png"
-                    let ball = SKSpriteNode(imageNamed: "ballRed")
+                    // the static way of fetching filenames that start with "ball" which don't contain "@2x"
+                    // let balls = ["ballBlue", "ballCyan", "ballGreen", "ballGrey", "ballPurple", "ballRed", "ballYellow"]
+                    // the dynamic way
+                    var balls = [String]()
+                    let fileManager = NSFileManager.defaultManager()
+                    let path = NSBundle.mainBundle().resourcePath!
+                    let filenames = try! fileManager.contentsOfDirectoryAtPath(path)
+                    for filename in filenames {
+                        if filename.hasPrefix("ball") && !filename.containsString("@2x") {
+                            balls.append(filename)
+                        }
+                    }
+                    // generate a random index in the balls array
+                    let random = GKRandomSource.sharedRandom().nextIntWithUpperBound(balls.count)
+                    // otherwise, create a Sprite node based on a random ball image
+                    let ball = SKSpriteNode(imageNamed: balls[random])
                     // give the ball node a generic name
                     ball.name = "ball"
                     // create a physics body with a circle shape

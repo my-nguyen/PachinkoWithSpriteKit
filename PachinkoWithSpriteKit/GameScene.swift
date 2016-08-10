@@ -24,6 +24,13 @@ class GameScene: SKScene {
         // the effect is the falling boxes in touchesBegan() will be stopped/contained at the screen bottom
         physicsBody = SKPhysicsBody(edgeLoopFromRect: frame)
 
+        // make 4 slots, good and bad interwoven
+        makeSlotAt(CGPoint(x: 128, y: 0), isGood: true)
+        makeSlotAt(CGPoint(x: 384, y: 0), isGood: false)
+        makeSlotAt(CGPoint(x: 640, y: 0), isGood: true)
+        makeSlotAt(CGPoint(x: 896, y: 0), isGood: false)
+
+        // create 5 bouncers spread evenly across the bottom of the screen
         makeBouncerAt(CGPoint(x: 0, y: 0))
         makeBouncerAt(CGPoint(x: 256, y: 0))
         makeBouncerAt(CGPoint(x: 512, y: 0))
@@ -61,5 +68,18 @@ class GameScene: SKScene {
         // set up so the bouncer object won't move when collided
         bouncer.physicsBody!.dynamic = false
         addChild(bouncer)
+    }
+
+    // create a slot (good or bad)
+    func makeSlotAt(position: CGPoint, isGood: Bool) {
+        var slotBase: SKSpriteNode
+        if isGood {
+            slotBase = SKSpriteNode(imageNamed: "slotBaseGood")
+        } else {
+            slotBase = SKSpriteNode(imageNamed: "slotBaseBad")
+        }
+
+        slotBase.position = position
+        addChild(slotBase)
     }
 }

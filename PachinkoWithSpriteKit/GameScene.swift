@@ -74,6 +74,7 @@ class GameScene: SKScene {
     func makeSlotAt(position: CGPoint, isGood: Bool) {
         var slotBase: SKSpriteNode
         var slotGlow: SKSpriteNode
+
         if isGood {
             slotBase = SKSpriteNode(imageNamed: "slotBaseGood")
             slotGlow = SKSpriteNode(imageNamed: "slotGlowGood")
@@ -87,5 +88,11 @@ class GameScene: SKScene {
 
         addChild(slotBase)
         addChild(slotGlow)
+
+        // rotate the node by 90 degrees over 10 seconds
+        let spin = SKAction.rotateByAngle(CGFloat(M_PI_2), duration: 10)
+        // repeat the rotation forever
+        let spinForever = SKAction.repeatActionForever(spin)
+        slotGlow.runAction(spinForever)
     }
 }

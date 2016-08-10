@@ -31,6 +31,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
     }
+    var remainingBallCount = 5
 
     override func didMoveToView(view: SKView) {
         /// draw a dark blue background (replacing the default gray background) image in the center of the screen
@@ -88,10 +89,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             // obtain an array of nodes at tap locations
             let objects = nodesAtPoint(location) as [SKNode]
             if objects.contains(editLabel) {
-                // if the edit/done button was tapped, then flip the editingMode
+                // if the Edit button was tapped, then flip the editingMode
                 editingMode = !editingMode
             } else {
+                // otherwise, we're either in Editing mode or generating a new ball
                 if editingMode {
+                    /// we're in Editing mode
                     // generate a random number between 16 and 128
                     let random = GKRandomDistribution(lowestValue: 16, highestValue: 128).nextInt()
                     // create a size with random width and height of 16
@@ -112,39 +115,44 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     // add box to the scene
                     addChild(box)
                 } else {
-                    // the static way of fetching filenames that start with "ball" which don't contain "@2x"
-                    // let balls = ["ballBlue", "ballCyan", "ballGreen", "ballGrey", "ballPurple", "ballRed", "ballYellow"]
-                    // the dynamic way
-                    var balls = [String]()
-                    let fileManager = NSFileManager.defaultManager()
-                    let path = NSBundle.mainBundle().resourcePath!
-                    let filenames = try! fileManager.contentsOfDirectoryAtPath(path)
-                    for filename in filenames {
-                        if filename.hasPrefix("ball") && !filename.containsString("@2x") {
-                            balls.append(filename)
+                    /// we're generating a new ball
+                    if remainingBallCount > 0 {
+                        // the static way of fetching filenames that start with "ball" which don't contain "@2x"
+                        // let balls = ["ballBlue", "ballCyan", "ballGreen", "ballGrey", "ballPurple", "ballRed", "ballYellow"]
+                        // the dynamic way
+                        var balls = [String]()
+                        let fileManager = NSFileManager.defaultManager()
+                        let path = NSBundle.mainBundle().resourcePath!
+                        let filenames = try! fileManager.contentsOfDirectoryAtPath(path)
+                        for filename in filenames {
+                            if filename.hasPrefix("ball") && !filename.containsString("@2x") {
+                                balls.append(filename)
+                            }
                         }
+                        // generate a random index in the balls array
+                        let random = GKRandomSource.sharedRandom().nextIntWithUpperBound(balls.count)
+                        // otherwise, create a Sprite node based on a random ball image
+                        let ball = SKSpriteNode(imageNamed: balls[random])
+                        // give the ball node a generic name
+                        ball.name = "ball"
+                        // create a physics body with a circle shape
+                        ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.size.width/2.0)
+                        // set the ball node's contactTestBitMask property to its collisionBitMask
+                        // contactTestBitMask: which collisions do you want to now about? by default it's set to nothing
+                        // collisionBitMask: which nodes should I bump into? by default it's set to everything
+                        // setting contactTestBitMask to collisionBitMask: tell me about every collision
+                        ball.physicsBody!.contactTestBitMask = ball.physicsBody!.collisionBitMask
+                        // set the ball bounciness
+                        ball.physicsBody!.restitution = 0.4
+                        // set the ball's x coordinate the same as that of the tapped location
+                        ball.position.x = location.x
+                        // set the ball's y coordinate near the top of the screen
+                        ball.position.y = 765
+                        // add the ball to the scene
+                        addChild(ball)
+
+                        remainingBallCount -= 1
                     }
-                    // generate a random index in the balls array
-                    let random = GKRandomSource.sharedRandom().nextIntWithUpperBound(balls.count)
-                    // otherwise, create a Sprite node based on a random ball image
-                    let ball = SKSpriteNode(imageNamed: balls[random])
-                    // give the ball node a generic name
-                    ball.name = "ball"
-                    // create a physics body with a circle shape
-                    ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.size.width/2.0)
-                    // set the ball node's contactTestBitMask property to its collisionBitMask
-                    // contactTestBitMask: which collisions do you want to now about? by default it's set to nothing
-                    // collisionBitMask: which nodes should I bump into? by default it's set to everything
-                    // setting contactTestBitMask to collisionBitMask: tell me about every collision
-                    ball.physicsBody!.contactTestBitMask = ball.physicsBody!.collisionBitMask
-                    // set the ball bounciness
-                    ball.physicsBody!.restitution = 0.4
-                    // set the ball's x coordinate the same as that of the tapped location
-                    ball.position.x = location.x
-                    // set the ball's y coordinate near the top of the screen
-                    ball.position.y = 765
-                    // add the ball to the scene
-                    addChild(ball)
                 }
             }
         }
@@ -217,6 +225,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if object.name == "good" {
             destroyBall(ball)
             score += 1
+            remainingBallCount += 1
         } else if object.name == "bad" {
             destroyBall(ball)
             score -= 1

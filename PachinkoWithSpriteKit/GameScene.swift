@@ -102,11 +102,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     box.zRotation = RandomCGFloat(min: 0, max: 3)
                     // place the node at the location tapped
                     box.position = location
+                    // give the box node a generic name
+                    box.name = "box"
 
                     // attach a physics body to the node, and set it to stationary
                     box.physicsBody = SKPhysicsBody(rectangleOfSize: box.size)
                     box.physicsBody!.dynamic = false
 
+                    // add box to the scene
                     addChild(box)
                 } else {
                     // the static way of fetching filenames that start with "ball" which don't contain "@2x"
@@ -151,6 +154,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         /* Called before each frame is rendered */
     }
 
+    // this method is triggered when there's contact between 2 objects
+    func didBeginContact(contact: SKPhysicsContact) {
+        if contact.bodyA.node!.name == "ball" {
+            collisionBetweenBall(contact.bodyA.node!, object: contact.bodyB.node!)
+        } else if contact.bodyB.node!.name == "ball" {
+            collisionBetweenBall(contact.bodyB.node!, object: contact.bodyA.node!)
+        }
+    }
+    
     // create a stationary node which won't budge when collided by red balls
     func makeBouncerAt(position: CGPoint) {
         let bouncer = SKSpriteNode(imageNamed: "bouncer")
@@ -200,15 +212,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         slotGlow.runAction(spinForever)
     }
 
-    // invoked when there's contact between 2 objects
-    func didBeginContact(contact: SKPhysicsContact) {
-        if contact.bodyA.node!.name == "ball" {
-            collisionBetweenBall(contact.bodyA.node!, object: contact.bodyB.node!)
-        } else if contact.bodyB.node!.name == "ball" {
-            collisionBetweenBall(contact.bodyB.node!, object: contact.bodyA.node!)
-        }
-    }
-
     func collisionBetweenBall(ball: SKNode, object: SKNode) {
         // remove ball when it collides with either the good or the bad slot
         if object.name == "good" {
@@ -217,6 +220,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         } else if object.name == "bad" {
             destroyBall(ball)
             score -= 1
+        // remove box when a ball hits it
+        } else if object.name == "box" {
+            destroyBox(object)
         }
         // ignore when 2 balls collide, so the 2 balls will remain intact
     }
@@ -232,5 +238,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
         // remove the ball from the game
         ball.removeFromParent()
+    }
+
+    // remove the box from the game
+    func destroyBox(box: SKNode) {
+        box.removeFromParent()
     }
 }

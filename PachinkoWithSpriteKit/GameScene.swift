@@ -92,28 +92,43 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 // if the Edit button was tapped, then flip the editingMode
                 editingMode = !editingMode
             } else {
-                // otherwise, we're either in Editing mode or generating a new ball
+                // otherwise, we're either in Editing mode (to add or remove boxes) or generating a new ball
                 if editingMode {
                     /// we're in Editing mode
-                    // generate a random number between 16 and 128
-                    let random = GKRandomDistribution(lowestValue: 16, highestValue: 128).nextInt()
-                    // create a size with random width and height of 16
-                    let size = CGSize(width: random, height: 16)
-                    // create a SKSpriteNode with the size and a random color
-                    let box = SKSpriteNode(color: RandomColor(), size: size)
-                    // set a random rotation on the node (box)
-                    box.zRotation = RandomCGFloat(min: 0, max: 3)
-                    // place the node at the location tapped
-                    box.position = location
-                    // give the box node a generic name
-                    box.name = "box"
+                    // look for a box at the touched location
+                    var boxFound = false
+                    print("objects count: \(objects.count)")
+                    for object in objects {
+                        // there's a box at the touched location: remove it
+                        if object.name == "box" {
+                            boxFound = true
+                            destroyBox(object)
+                            break
+                        }
+                    }
 
-                    // attach a physics body to the node, and set it to stationary
-                    box.physicsBody = SKPhysicsBody(rectangleOfSize: box.size)
-                    box.physicsBody!.dynamic = false
+                    // only generate a new box if no box was found at touched location
+                    if !boxFound {
+                        // generate a random number between 16 and 128
+                        let random = GKRandomDistribution(lowestValue: 16, highestValue: 128).nextInt()
+                        // create a size with random width and height of 16
+                        let size = CGSize(width: random, height: 16)
+                        // create a SKSpriteNode with the size and a random color
+                        let box = SKSpriteNode(color: RandomColor(), size: size)
+                        // set a random rotation on the node (box)
+                        box.zRotation = RandomCGFloat(min: 0, max: 3)
+                        // place the node at the location tapped
+                        box.position = location
+                        // give the box node a generic name
+                        box.name = "box"
 
-                    // add box to the scene
-                    addChild(box)
+                        // attach a physics body to the node, and set it to stationary
+                        box.physicsBody = SKPhysicsBody(rectangleOfSize: box.size)
+                        box.physicsBody!.dynamic = false
+
+                        // add box to the scene
+                        addChild(box)
+                    }
                 } else {
                     /// we're generating a new ball
                     if remainingBallCount > 0 {
@@ -129,6 +144,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                                 balls.append(filename)
                             }
                         }
+
                         // generate a random index in the balls array
                         let random = GKRandomSource.sharedRandom().nextIntWithUpperBound(balls.count)
                         // otherwise, create a Sprite node based on a random ball image

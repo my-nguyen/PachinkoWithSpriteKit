@@ -206,6 +206,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     func destroyBall(ball: SKNode) {
+        // create high-performance particle effects from a filename
+        if let fireParticles = SKEmitterNode(fileNamed: "FireParticles") {
+            // place the fire particles at the ball's position
+            fireParticles.position = ball.position
+            // add the particles to the scene
+            addChild(fireParticles)
+        }
+
         // remove the ball from the game
         ball.removeFromParent()
     }

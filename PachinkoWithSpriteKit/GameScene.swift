@@ -8,7 +8,8 @@
 
 import SpriteKit
 
-class GameScene: SKScene {
+// class conforms to the SKPhysicsContactDelegate protocol
+class GameScene: SKScene, SKPhysicsContactDelegate {
     override func didMoveToView(view: SKView) {
         /// draw a dark blue background (replacing the default gray background) image in the center of the screen
         let background = SKSpriteNode(imageNamed: "background.jpg")
@@ -23,6 +24,9 @@ class GameScene: SKScene {
         // add a physics body to the whole scene (edgeLoopFromRect goes around the scene)
         // the effect is the falling boxes in touchesBegan() will be stopped/contained at the screen bottom
         physicsBody = SKPhysicsBody(edgeLoopFromRect: frame)
+
+        // set the current scene as the physics world's contact delegate
+        physicsWorld.contactDelegate = self
 
         // make 4 slots, good and bad interwoven
         makeSlotAt(CGPoint(x: 128, y: 0), isGood: true)
@@ -45,8 +49,15 @@ class GameScene: SKScene {
             let location = touch.locationInNode(self)
             // create a Sprite node based on the image "ballRed.png"
             let ball = SKSpriteNode(imageNamed: "ballRed")
+            // give the ball node a generic name
+            ball.name = "ball"
             // create a physics body with a circle shape
             ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.size.width/2.0)
+            // set the ball node's contactTestBitMask property to its collisionBitMask
+            // contactTestBitMask: which collisions do you want to now about? by default it's set to nothing
+            // collisionBitMask: which nodes should I bump into? by default it's set to everything
+            // setting contactTestBitMask to collisionBitMask: tell me about every collision
+            ball.physicsBody!.contactTestBitMask = ball.physicsBody!.collisionBitMask
             // set the ball bounciness
             ball.physicsBody!.restitution = 0.4
             // set the ball's position at where the touch occurred
@@ -65,6 +76,10 @@ class GameScene: SKScene {
         let bouncer = SKSpriteNode(imageNamed: "bouncer")
         bouncer.position = position
         bouncer.physicsBody = SKPhysicsBody(circleOfRadius: bouncer.size.width/2.0)
+
+        // setting contactTestBitMask to collisionBitMask: tell me about every collision
+        bouncer.physicsBody!.contactTestBitMask = bouncer.physicsBody!.collisionBitMask
+        
         // set up so the bouncer object won't move when collided
         bouncer.physicsBody!.dynamic = false
         addChild(bouncer)
@@ -78,13 +93,22 @@ class GameScene: SKScene {
         if isGood {
             slotBase = SKSpriteNode(imageNamed: "slotBaseGood")
             slotGlow = SKSpriteNode(imageNamed: "slotGlowGood")
+            // assign name to the slot for general usage, as opposed to declaring multiple variables
+            // for different slots
+            slotBase.name = "good"
         } else {
             slotBase = SKSpriteNode(imageNamed: "slotBaseBad")
             slotGlow = SKSpriteNode(imageNamed: "slotGlowBad")
+            slotBase.name = "bad"
         }
 
         slotBase.position = position
         slotGlow.position = position
+
+        // add rectangle physics to the slot
+        slotBase.physicsBody = SKPhysicsBody(rectangleOfSize: slotBase.size)
+        // slot needs to be stationary
+        slotBase.physicsBody!.dynamic = false
 
         addChild(slotBase)
         addChild(slotGlow)
@@ -94,5 +118,29 @@ class GameScene: SKScene {
         // repeat the rotation forever
         let spinForever = SKAction.repeatActionForever(spin)
         slotGlow.runAction(spinForever)
+    }
+
+    // invoked when there's contact between 2 objects
+    func didBeginContact(contact: SKPhysicsContact) {
+        if contact.bodyA.node!.name == "ball" {
+            collisionBetweenBall(contact.bodyA.node!, object: contact.bodyB.node!)
+        } else if contact.bodyB.node!.name == "ball" {
+            collisionBetweenBall(contact.bodyB.node!, object: contact.bodyA.node!)
+        }
+    }
+
+    func collisionBetweenBall(ball: SKNode, object: SKNode) {
+        // remove ball when it collides with either the good or the bad slot
+        if object.name == "good" {
+            destroyBall(ball)
+        } else if object.name == "bad" {
+            destroyBall(ball)
+        }
+        // ignore when 2 balls collide, so the 2 balls will remain intact
+    }
+
+    func destroyBall(ball: SKNode) {
+        // remove the ball from the game
+        ball.removeFromParent()
     }
 }

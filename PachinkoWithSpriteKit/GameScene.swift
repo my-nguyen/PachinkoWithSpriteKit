@@ -136,8 +136,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     ball.physicsBody!.contactTestBitMask = ball.physicsBody!.collisionBitMask
                     // set the ball bounciness
                     ball.physicsBody!.restitution = 0.4
-                    // set the ball's position at where the touch occurred
-                    ball.position = location
+                    // set the ball's x coordinate the same as that of the tapped location
+                    ball.position.x = location.x
+                    // set the ball's y coordinate near the top of the screen
+                    ball.position.y = 765
                     // add the ball to the scene
                     addChild(ball)
                 }

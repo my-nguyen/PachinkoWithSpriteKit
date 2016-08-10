@@ -73,13 +73,19 @@ class GameScene: SKScene {
     // create a slot (good or bad)
     func makeSlotAt(position: CGPoint, isGood: Bool) {
         var slotBase: SKSpriteNode
+        var slotGlow: SKSpriteNode
         if isGood {
             slotBase = SKSpriteNode(imageNamed: "slotBaseGood")
+            slotGlow = SKSpriteNode(imageNamed: "slotGlowGood")
         } else {
             slotBase = SKSpriteNode(imageNamed: "slotBaseBad")
+            slotGlow = SKSpriteNode(imageNamed: "slotGlowBad")
         }
 
         slotBase.position = position
+        slotGlow.position = position
+
         addChild(slotBase)
+        addChild(slotGlow)
     }
 }

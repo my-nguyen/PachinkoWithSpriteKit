@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import GameplayKit
 
 // class conforms to the SKPhysicsContactDelegate protocol
 class GameScene: SKScene, SKPhysicsContactDelegate {
@@ -16,6 +17,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var score: Int = 0 {
         didSet {
             scoreLabel.text = "Score: \(score)"
+        }
+    }
+
+    // edit mode and label, with property observer
+    var editLabel: SKLabelNode!
+    var editingMode: Bool = false {
+        didSet {
+            if editingMode {
+                editLabel.text = "Done"
+            } else {
+                editLabel.text = "Edit"
+            }
         }
     }
 
@@ -58,6 +71,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // position the label on the top-right edge of the scene
         scoreLabel.position = CGPoint(x: 980, y: 700)
         addChild(scoreLabel)
+
+        // similar to the code block above, with scoreLabel
+        editLabel = SKLabelNode(fontNamed: "Chalkduster")
+        editLabel.text = "Edit"
+        editLabel.position = CGPoint(x: 80, y: 700)
+        addChild(editLabel)
     }
 
     // this method is triggered when the user touches the screen.
@@ -65,23 +84,50 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if let touch = touches.first {
             // fetch the location where the screen is touched
             let location = touch.locationInNode(self)
-            // create a Sprite node based on the image "ballRed.png"
-            let ball = SKSpriteNode(imageNamed: "ballRed")
-            // give the ball node a generic name
-            ball.name = "ball"
-            // create a physics body with a circle shape
-            ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.size.width/2.0)
-            // set the ball node's contactTestBitMask property to its collisionBitMask
-            // contactTestBitMask: which collisions do you want to now about? by default it's set to nothing
-            // collisionBitMask: which nodes should I bump into? by default it's set to everything
-            // setting contactTestBitMask to collisionBitMask: tell me about every collision
-            ball.physicsBody!.contactTestBitMask = ball.physicsBody!.collisionBitMask
-            // set the ball bounciness
-            ball.physicsBody!.restitution = 0.4
-            // set the ball's position at where the touch occurred
-            ball.position = location
-            // add the ball to the scene
-            addChild(ball)
+
+            // obtain an array of nodes at tap locations
+            let objects = nodesAtPoint(location) as [SKNode]
+            if objects.contains(editLabel) {
+                // if the edit/done button was tapped, then flip the editingMode
+                editingMode = !editingMode
+            } else {
+                if editingMode {
+                    // generate a random number between 16 and 128
+                    let random = GKRandomDistribution(lowestValue: 16, highestValue: 128).nextInt()
+                    // create a size with random width and height of 16
+                    let size = CGSize(width: random, height: 16)
+                    // create a SKSpriteNode with the size and a random color
+                    let box = SKSpriteNode(color: RandomColor(), size: size)
+                    // set a random rotation on the node (box)
+                    box.zRotation = RandomCGFloat(min: 0, max: 3)
+                    // place the node at the location tapped
+                    box.position = location
+
+                    // attach a physics body to the node, and set it to stationary
+                    box.physicsBody = SKPhysicsBody(rectangleOfSize: box.size)
+                    box.physicsBody!.dynamic = false
+
+                    addChild(box)
+                } else {
+                    // otherwise, create a Sprite node based on the image "ballRed.png"
+                    let ball = SKSpriteNode(imageNamed: "ballRed")
+                    // give the ball node a generic name
+                    ball.name = "ball"
+                    // create a physics body with a circle shape
+                    ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.size.width/2.0)
+                    // set the ball node's contactTestBitMask property to its collisionBitMask
+                    // contactTestBitMask: which collisions do you want to now about? by default it's set to nothing
+                    // collisionBitMask: which nodes should I bump into? by default it's set to everything
+                    // setting contactTestBitMask to collisionBitMask: tell me about every collision
+                    ball.physicsBody!.contactTestBitMask = ball.physicsBody!.collisionBitMask
+                    // set the ball bounciness
+                    ball.physicsBody!.restitution = 0.4
+                    // set the ball's position at where the touch occurred
+                    ball.position = location
+                    // add the ball to the scene
+                    addChild(ball)
+                }
+            }
         }
     }
    

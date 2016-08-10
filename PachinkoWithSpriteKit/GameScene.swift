@@ -11,8 +11,8 @@ import SpriteKit
 // class conforms to the SKPhysicsContactDelegate protocol
 class GameScene: SKScene, SKPhysicsContactDelegate {
 
+    // score and label, with property observer
     var scoreLabel: SKLabelNode!
-    // score, with property observer
     var score: Int = 0 {
         didSet {
             scoreLabel.text = "Score: \(score)"
